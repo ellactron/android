@@ -17,4 +17,5 @@
     <string name="rest_base">/rest/v1</string>
     <string name="register_service">/register</string>
     <string name="token_service">/login/token</string>
+    <string name="facebook_app_id">1916572711894629</string>
 </resources>

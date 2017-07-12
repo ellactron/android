@@ -8,6 +8,7 @@ import android.util.Log;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.ellactron.services.UserService;
+import com.facebook.internal.Utility;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,9 +16,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.UnsupportedEncodingException;
-
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 /**
@@ -26,7 +26,7 @@ import static org.junit.Assert.fail;
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
 @RunWith(AndroidJUnit4.class)
-public class ExampleInstrumentedTest {
+public class IntegrationTest {
     final Object lock = new Object();
 
     @Test
@@ -35,6 +35,14 @@ public class ExampleInstrumentedTest {
         Context appContext = InstrumentationRegistry.getTargetContext();
 
         assertEquals("com.ellactron.android", appContext.getPackageName());
+    }
+
+    @Test
+    public void getFacebookAppId() throws Exception {
+        // Context of the app under test.
+        Context appContext = InstrumentationRegistry.getTargetContext();
+        final String appId = Utility.getMetadataApplicationId(appContext);
+        assertNotNull(appId);
     }
 
     @Test
