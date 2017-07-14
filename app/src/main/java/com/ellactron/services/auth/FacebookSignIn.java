@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 
+import com.ellactron.helpers.ParameterredCallback;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -13,8 +14,6 @@ import com.facebook.Profile;
 import com.facebook.ProfileTracker;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
-
-import java.util.concurrent.Callable;
 
 import com.ellactron.activities.R;
 /**
@@ -47,7 +46,11 @@ public class FacebookSignIn {
         }
     }
 
-    public void registerSignInButton(final Callable<Void> onSuccessCallback) {
+    public String getAccessToken() {
+        return AccessToken.getCurrentAccessToken().getToken();
+    }
+
+    public void registerSignInButton(final ParameterredCallback<String, Void> onSuccessCallback) {
         // 设置认证按钮，这必须在 OAuth2 认证界面初始化完成之后
         LoginButton mFacebookSignInButton = (LoginButton)activity.findViewById(R.id.facebook_sign_in_button);
 
@@ -65,10 +68,10 @@ public class FacebookSignIn {
                                 Profile.setCurrentProfile(currentProfile);
 
                                 Log.d(this.getClass().getCanonicalName(),
-                                        "Current access token: " + AccessToken.getCurrentAccessToken().getToken());
+                                        "Current access token: " + getAccessToken());
 
                                 try {
-                                    onSuccessCallback.call();
+                                    onSuccessCallback.call(getAccessToken());
                                 } catch (Exception e) {
                                     Log.d(this.getClass().getCanonicalName(), e.getMessage());
                                 }

@@ -8,6 +8,7 @@ import android.util.Log;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.ellactron.services.UserService;
+import com.ellactron.storage.ConfigurationStorage;
 import com.facebook.internal.Utility;
 
 import org.json.JSONException;
@@ -15,6 +16,8 @@ import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -28,19 +31,19 @@ import static org.junit.Assert.fail;
 @RunWith(AndroidJUnit4.class)
 public class IntegrationTest {
     final Object lock = new Object();
+    final Context appContext = InstrumentationRegistry.getTargetContext();
 
     @Test
     public void useAppContext() throws Exception {
         // Context of the app under test.
-        Context appContext = InstrumentationRegistry.getTargetContext();
-
+        //Context appContext = InstrumentationRegistry.getTargetContext();
         assertEquals("com.ellactron.android", appContext.getPackageName());
     }
 
     @Test
     public void getFacebookAppId() throws Exception {
         // Context of the app under test.
-        Context appContext = InstrumentationRegistry.getTargetContext();
+        //Context appContext = InstrumentationRegistry.getTargetContext();
         final String appId = Utility.getMetadataApplicationId(appContext);
         assertNotNull(appId);
     }
@@ -48,7 +51,7 @@ public class IntegrationTest {
     @Test
     public void testRegister() throws InterruptedException, JSONException {
         final Object lock = new Object();
-        final UserService userService = new UserService(InstrumentationRegistry.getTargetContext());
+        final UserService userService = new UserService(appContext);
         userService.register("newuser@domain.com","pa55w0rd",
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -115,7 +118,7 @@ public class IntegrationTest {
     }
 
     public void getToken(String username, String password, Response.ErrorListener errorListener) throws InterruptedException {
-        final UserService userService = new UserService(InstrumentationRegistry.getTargetContext());
+        final UserService userService = new UserService(appContext);
         userService.getToken(username,password,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -138,5 +141,26 @@ public class IntegrationTest {
         synchronized(lock) {
             lock.wait();
         }
+    }
+
+    @Test
+    public void testConfigurationStorage() throws IOException, JSONException {
+        ConfigurationStorage configurationStorage = ConfigurationStorage.getConfigurationStorage(appContext);
+        configurationStorage.set("name1","value1");
+        configurationStorage.set("name2","value2");
+
+        Assert.assertTrue(configurationStorage.getConfiguration().has("name1"));
+        Assert.assertTrue(configurationStorage.getConfiguration().has("name2"));
+        Assert.assertEquals("value1",configurationStorage.getConfiguration().get("name1"));
+
+        configurationStorage.remove("name1");
+        Assert.assertFalse(configurationStorage.getConfiguration().has("name1"));
+
+        configurationStorage.set("name2", "value2_changed");
+        Assert.assertEquals("value2_changed",configurationStorage.getConfiguration().get("name2"));
+
+        Log.d(this.getClass().getName(), configurationStorage.getConfiguration().toString());
+
+        configurationStorage.delete();
     }
 }

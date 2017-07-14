@@ -66,4 +66,19 @@ public class UserService extends RestService{
 
         this.mQueue.add(jsonRequest);
     }
+
+    public void getSiteTokenByOAuth2Token(String oauth2token,
+                         final Response.Listener<JSONObject> listener,
+                         Response.ErrorListener errorListener) {
+        final VolleyStringRequest jsonRequest = requestFactory.getStringRequest(
+                Request.Method.PUT,
+                context.getString(R.string.facebook_auth) + "/" + oauth2token,
+                null,
+                null,
+                listener,
+                errorListener);
+        jsonRequest.setTag("REQUEST_TAG");
+
+        this.mQueue.add(jsonRequest);
+    }
 }

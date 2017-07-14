@@ -13,9 +13,10 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
-    <string name="base_url">http://10.192.113.52:8080</string>
+    <string name="base_url">http://192.168.10.54:8080</string>
     <string name="rest_base">/rest/v1</string>
     <string name="register_service">/register</string>
     <string name="token_service">/login/token</string>
+    <string name="facebook_auth">/login/facebook/accesstoken</string>
     <string name="facebook_app_id">1916572711894629</string>
 </resources>

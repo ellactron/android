@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
@@ -18,6 +19,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -28,11 +30,19 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.ellactron.helpers.ParameterredCallback;
+import com.ellactron.services.UserService;
 import com.ellactron.services.auth.FacebookSignIn;
+import com.ellactron.storage.ConfigurationStorage;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -63,15 +73,21 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private View mProgressView;
     private View mLoginFormView;
 
+    Context context = null;
+    UserService userService = null;
+
+    private void init(){
+        context = this.getApplication().getApplicationContext();
+        userService = new UserService(getApplicationContext());
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        init();
+
         initialOAuth2Sdk();
-        if (isUserLoggedIn()) {
-            showMainWindow();
-            return;
-        }
 
         setContentView(R.layout.activity_login);
         // 注册登录按钮
@@ -103,6 +119,22 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        try {
+            showMainWindow();
+        } catch (Exception e) {
+            Log.d(this.getClass().getName(), e.getMessage());
+            return;
+        }
+    }
+
+    // 添加 Facebook login 回调
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (null != fb)
+            fb.onActivityResult(requestCode, resultCode, data);
     }
 
     private void populateAutoComplete() {
@@ -290,7 +322,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mEmailView.setAdapter(adapter);
     }
 
-
     private interface ProfileQuery {
         String[] PROJECTION = {
                 ContactsContract.CommonDataKinds.Email.ADDRESS,
@@ -313,16 +344,32 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         fb.initialFacebookSdk(this);
     }
 
-    private boolean isUserLoggedIn() {
+    /*private boolean isUserLoggedIn() {
         return (null == fb) ? false : (null != fb.getFacebookProfile());
-    }
+    }*/
 
     private void registerLogInButon() {
-        // 注册登录按钮
+        // 注册登录成功后回调函数
         if (null != fb) {
-            fb.registerSignInButton(new Callable<Void>() {
+            fb.registerSignInButton(new ParameterredCallback<String, Void>() {
                 @Override
-                public Void call() throws Exception {
+                public Void call(String accessToken) throws IOException, JSONException, InterruptedException {
+                    /*getTokenByOAuth2(accessToken,
+                            new ParameterredCallback<String, Void>() {
+                                @Override
+                                public Void call(String siteToken) throws Exception {
+                                    storeSiteToken(siteToken);
+                                    showMainWindow();
+                                    return null;
+                                }
+                            },
+                            new ParameterredCallback<Exception, Void>() {
+                                @Override
+                                public Void call(Exception exception) {
+                                    // TODO: Show login failed message
+                                    return null;
+                                }
+                            });*/
                     showMainWindow();
                     return null;
                 }
@@ -330,9 +377,83 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 
-    public void showMainWindow() {
-        startActivity(new Intent(this, HomeActivity.class));
-        finish();
+    private void storeSiteToken(String siteToken) throws IOException, JSONException {
+        ConfigurationStorage storage = ConfigurationStorage.getConfigurationStorage(context);
+        storage.set("token", siteToken);
+    }
+
+    public void getTokenByOAuth2(String accessToken,
+                                 final ParameterredCallback<String, Void> onAuthenticationSuccess,
+                                 final ParameterredCallback<Exception, Void> onAuthenticationFailed) throws InterruptedException {
+        userService.getSiteTokenByOAuth2Token(accessToken,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d(this.getClass().getName(), (response).toString());
+                        try {
+                            String siteToken = response.getString("token");
+                            onAuthenticationSuccess.call(siteToken);
+                        } catch (Exception e) {
+                            Log.d(this.getClass().getName(), (response).toString());
+                            Log.d(this.getClass().getName(), e.getMessage());
+                            try {
+                                onAuthenticationFailed.call(e);
+                            } catch (Exception e1) {
+                                Log.d(this.getClass().getName(), e1.getMessage());
+                            }
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        try {
+                            onAuthenticationFailed.call(error);
+                        } catch (Exception e) {
+                            Log.d(this.getClass().getName(), e.getMessage());
+                        }
+                    }
+                });
+    }
+
+    public void showMainWindow() throws IOException, JSONException, InterruptedException {
+        Object lock;
+
+        // TODO:
+        // 1. If site token is existing login by site token
+        // 2. else check OAuth2 token, if exits, login by access token and store site token
+        // 3. else return back to LoginActivity
+        // 4. else show MainActivity.
+
+        String token = (String) ConfigurationStorage.getConfigurationStorage(context).get("token");
+        if(null == token) {
+            String accessToken = (null == fb) ? null : fb.getAccessToken();
+            if (null != accessToken) {
+                getTokenByOAuth2(accessToken,
+                        new ParameterredCallback<String, Void>() {
+                            @Override
+                            public Void call(String siteToken) throws Exception {
+                                storeSiteToken(siteToken);
+                                showMainWindow();
+                                return null;
+                            }
+                        },
+                        new ParameterredCallback<Exception, Void>() {
+                            @Override
+                            public Void call(Exception exception) {
+                                // TODO: Show login failed message
+                                return null;
+                            }
+                        });
+            }
+        }
+
+        //if (isUserLoggedIn()) {
+            startActivity(new Intent(this, HomeActivity.class));
+            finish();
+        // } else {
+        //    TODO: ...
+        //}
     }
 
     /**
