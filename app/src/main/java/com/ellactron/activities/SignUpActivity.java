@@ -3,21 +3,24 @@ package com.ellactron.activities;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.app.LoaderManager.LoaderCallbacks;
-import android.content.Context;
-import android.content.CursorLoader;
+import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
-import android.content.Loader;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Build;
-import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.app.LoaderManager.LoaderCallbacks;
+
+import android.content.CursorLoader;
+import android.content.Loader;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.AsyncTask;
+
+import android.os.Build;
+import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -32,77 +35,42 @@ import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.ellactron.helpers.ParameterredCallback;
 import com.ellactron.services.UserService;
-import com.ellactron.services.auth.FacebookSignIn;
-import com.ellactron.storage.ConfigurationStorage;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import static android.Manifest.permission.READ_CONTACTS;
+import static junit.framework.Assert.fail;
 
 /**
  * A login screen that offers login via email/password.
  */
-public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
-    private final int SIGN_UP_ACTIVITY_RETURN_CODE = 1;
+public class SignUpActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
     /**
      * Id to identity READ_CONTACTS permission request.
      */
     private static final int REQUEST_READ_CONTACTS = 0;
 
     /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
-    };
-    /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
-    private UserLoginTask mAuthTask = null;
+    private UserSignUpTask mAuthTask = null;
 
     // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
     private View mProgressView;
-    private View mLoginFormView;
-
-    Context context = null;
-    UserService userService = null;
-
-    private void init(){
-        context = this.getApplication().getApplicationContext();
-        userService = new UserService(getApplicationContext());
-    }
-
-    public void setCredential(String email, String password) {
-        if(null != mEmailView) {
-            mEmailView.setText(email);
-        }
-        if(null != mPasswordView) {
-            mPasswordView.setText(password);
-        }
-    }
+    private View mSignUpFormView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        init();
-
-        initialOAuth2Sdk();
-
-        setContentView(R.layout.activity_login);
-        // 注册登录按钮
-        registerLogInButon();
-
+        setContentView(R.layout.activity_signup);
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
@@ -112,69 +80,23 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
                 if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
+                    attemptSignUp();
                     return true;
                 }
                 return false;
             }
         });
 
-        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_up_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                attemptLogin();
+                attemptSignUp();
             }
         });
 
-        mLoginFormView = findViewById(R.id.login_form);
-        mProgressView = findViewById(R.id.login_progress);
-
-
-        TextView mSignUp = (TextView) findViewById(R.id.textSignUp);
-        mSignUp.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showSignUpWindow();
-            }
-        });
-
-        /*try {
-            showMainWindow();
-        } catch (Exception e) {
-            Log.d(this.getClass().getName(), e.getMessage());
-            return;
-        }*/
-    }
-
-    public void showSignUpWindow() {
-        Intent intent = new Intent(this, SignUpActivity.class);
-        intent.putExtra("activity", this.getClass().getCanonicalName());
-        startActivityForResult(intent, SIGN_UP_ACTIVITY_RETURN_CODE);
-        //finish();
-    }
-
-
-    // 添加 Facebook login 回调
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
-
-        switch (requestCode){
-            case SIGN_UP_ACTIVITY_RETURN_CODE:
-                try {
-                    JSONObject credentialObject = new JSONObject(intent.getStringExtra("credential"));
-                    JSONObject accountObject = credentialObject.getJSONObject("account");
-                    setCredential(accountObject.getString("username"), accountObject.getString("password"));
-                    // TODO: Automatically login
-                    //
-                } catch (JSONException e) {
-                    Log.e(this.getClass().getName(), e.getMessage());
-                }
-            default:
-                if (null != fb)
-                    fb.onActivityResult(requestCode, resultCode, intent);
-        }
+        mSignUpFormView = findViewById(R.id.signUp_form);
+        mProgressView = findViewById(R.id.signUp_progress);
     }
 
     private void populateAutoComplete() {
@@ -226,7 +148,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
-    private void attemptLogin() {
+    private void attemptSignUp() {
         if (mAuthTask != null) {
             return;
         }
@@ -268,7 +190,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
+            mAuthTask = new UserSignUpTask(email, password);
             mAuthTask.execute((Void) null);
         }
     }
@@ -294,12 +216,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
             int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
+            mSignUpFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+            mSignUpFormView.animate().setDuration(shortAnimTime).alpha(
                     show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+                    mSignUpFormView.setVisibility(show ? View.GONE : View.VISIBLE);
                 }
             });
 
@@ -315,7 +237,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // The ViewPropertyAnimator APIs are not available, so simply show
             // and hide the relevant UI components.
             mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+            mSignUpFormView.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }
 
@@ -356,7 +278,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
         //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
         ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(LoginActivity.this,
+                new ArrayAdapter<>(SignUpActivity.this,
                         android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
 
         mEmailView.setAdapter(adapter);
@@ -373,164 +295,33 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     /**
-     * OAuth2: Facebook
-     */
-    static FacebookSignIn fb;
-
-    private void initialOAuth2Sdk() {
-        if (null == fb) {
-            fb = new FacebookSignIn();
-        }
-        fb.initialFacebookSdk(this);
-    }
-
-    /*private boolean isUserLoggedIn() {
-        return (null == fb) ? false : (null != fb.getFacebookProfile());
-    }*/
-
-    private void registerLogInButon() {
-        // 注册登录成功后回调函数
-        if (null != fb) {
-            fb.registerSignInButton(new ParameterredCallback<String, Void>() {
-                @Override
-                public Void call(String accessToken) throws IOException, JSONException, InterruptedException {
-                    /*getTokenByOAuth2(accessToken,
-                            new ParameterredCallback<String, Void>() {
-                                @Override
-                                public Void call(String siteToken) throws Exception {
-                                    storeSiteToken(siteToken);
-                                    showMainWindow();
-                                    return null;
-                                }
-                            },
-                            new ParameterredCallback<Exception, Void>() {
-                                @Override
-                                public Void call(Exception exception) {
-                                    // TODO: Show login failed message
-                                    return null;
-                                }
-                            });*/
-                    showMainWindow();
-                    return null;
-                }
-            });
-        }
-    }
-
-    private void storeSiteToken(String siteToken) throws IOException, JSONException {
-        ConfigurationStorage storage = ConfigurationStorage.getConfigurationStorage(context);
-        storage.set("token", siteToken);
-    }
-
-    public void getTokenByOAuth2(String accessToken,
-                                 final ParameterredCallback<String, Void> onAuthenticationSuccess,
-                                 final ParameterredCallback<Exception, Void> onAuthenticationFailed) throws InterruptedException {
-        userService.getSiteTokenByOAuth2Token(accessToken,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        Log.d(this.getClass().getName(), (response).toString());
-                        try {
-                            String siteToken = response.getString("token");
-                            onAuthenticationSuccess.call(siteToken);
-                        } catch (Exception e) {
-                            Log.d(this.getClass().getName(), (response).toString());
-                            Log.d(this.getClass().getName(), e.getMessage());
-                            try {
-                                onAuthenticationFailed.call(e);
-                            } catch (Exception e1) {
-                                Log.d(this.getClass().getName(), e1.getMessage());
-                            }
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        try {
-                            onAuthenticationFailed.call(error);
-                        } catch (Exception e) {
-                            Log.d(this.getClass().getName(), e.getMessage());
-                        }
-                    }
-                });
-    }
-
-    public void showMainWindow() throws IOException, JSONException, InterruptedException {
-        Object lock;
-
-        // TODO:
-        // 1. If site token is existing login by site token
-        // 2. else check OAuth2 token, if exits, login by access token and store site token
-        // 3. else return back to LoginActivity
-        // 4. else show MainActivity.
-
-        String token = (String) ConfigurationStorage.getConfigurationStorage(context).get("token");
-        if(null == token) {
-            String accessToken = (null == fb) ? null : fb.getAccessToken();
-            if (null != accessToken) {
-                getTokenByOAuth2(accessToken,
-                        new ParameterredCallback<String, Void>() {
-                            @Override
-                            public Void call(String siteToken) throws Exception {
-                                storeSiteToken(siteToken);
-                                showMainWindow();
-                                return null;
-                            }
-                        },
-                        new ParameterredCallback<Exception, Void>() {
-                            @Override
-                            public Void call(Exception exception) {
-                                // TODO: Show login failed message
-                                return null;
-                            }
-                        });
-            }
-        }
-
-        //if (isUserLoggedIn()) {
-        startActivity(new Intent(this, HomeActivity.class));
-        finish();
-        // } else {
-        //    TODO: ...
-        //}
-    }
-
-    /**
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    public class UserSignUpTask extends AsyncTask<Void, Void, Boolean> {
+        final JSONObject[] registerResponse = {null};
+        final Exception[] exceptions = {null};
 
         private final String mEmail;
         private final String mPassword;
 
-        UserLoginTask(String email, String password) {
+        UserSignUpTask(String email, String password) {
             mEmail = email;
             mPassword = password;
         }
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
             try {
-                // Simulate network access.
-                Thread.sleep(2000);
+                register(mEmail, mPassword);
             } catch (InterruptedException e) {
-                return false;
+                Log.d(this.getClass().getName(), e.getMessage());
+                exceptions[0] = e;
+            } catch (JSONException e) {
+                Log.d(this.getClass().getName(), e.getMessage());
+                exceptions[0] = e;
             }
-
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
-
-            // TODO: register the new account here.
-            return true;
+            return null == exceptions[0];
         }
 
         @Override
@@ -539,10 +330,28 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
 
             if (success) {
+                Intent intent = getIntent();
+                String activityName = intent.getStringExtra("activity");
+                if(activityName.equals(LoginActivity.class.getCanonicalName())){
+                    Intent newIntent = new Intent();
+                    try {
+                        registerResponse[0].getJSONObject("account").put("password",mPassword);
+                    } catch (JSONException e) {
+                        Log.e(this.getClass().getName(), e.getMessage());
+                    }
+                    newIntent.putExtra("credential", registerResponse[0].toString());
+                    setResult(RESULT_OK, newIntent);
+                }
                 finish();
             } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
+                if(exceptions[0] instanceof VolleyError){
+                    mPasswordView.setError(getString(R.string.error_general_register_failure));
+                    mPasswordView.requestFocus();
+                }
+                else {
+                    mPasswordView.setError(getString(R.string.error_incorrect_password));
+                    mPasswordView.requestFocus();
+                }
             }
         }
 
@@ -551,5 +360,35 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mAuthTask = null;
             showProgress(false);
         }
+
+        protected void register(String email, String password) throws InterruptedException, JSONException {
+            final Object lock = new Object();
+            final UserService userService = new UserService(getApplication().getApplicationContext());
+            userService.register(email,password,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            registerResponse[0] = response;
+                            synchronized(lock) {
+                                lock.notify();
+                            }
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Log.d(this.getClass().getName(), null==error.getMessage()?error.toString():error.getMessage());
+                            exceptions[0] = error;
+                            synchronized(lock) {
+                                lock.notify();
+                            }
+                        }
+                    });
+
+            synchronized(lock) {
+                lock.wait();
+            }
+        }
     }
 }
+
