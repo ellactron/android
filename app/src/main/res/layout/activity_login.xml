@@ -11,6 +11,18 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.ellactron.activities.LoginActivity">
 
+    <!--<TextView
+        android:id="@+id/signin_actionbar"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:background="@android:color/transparent"
+        android:gravity="center_vertical"
+        android:text="@string/title_activity_sign_in"
+        android:textAlignment="center"
+        android:textColor="@android:color/white"
+        android:textSize="18sp" />-->
+
     <!-- Login progress -->
     <ProgressBar
         android:id="@+id/login_progress"

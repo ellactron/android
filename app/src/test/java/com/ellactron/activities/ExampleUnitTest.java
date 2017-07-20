@@ -1,18 +1,8 @@
 package com.ellactron.activities;
 
-import android.content.res.Resources;
-import android.util.Log;
-
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.ellactron.http.volley.VolleyJSONObjectRequest;
-import com.ellactron.services.UserService;
-
-import org.json.JSONObject;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Example local unit test, which will execute on the development machine (host).

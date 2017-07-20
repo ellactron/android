@@ -4,23 +4,20 @@ import android.content.Context;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
+import com.ellactron.activities.R;
 import com.ellactron.http.volley.RestRequestFactory;
-import com.ellactron.http.volley.VolleyJSONObjectRequest;
 import com.ellactron.http.volley.VolleyStringRequest;
 
 import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import com.ellactron.activities.R;
 /**
  * Created by ji.wang on 2017-07-10.
  */
 
-public class UserService extends RestService{
-    private VolleyJSONObjectRequest jsonRequest;
-    private RestRequestFactory requestFactory;
+public class UserService extends RestService {
+    //private VolleyJSONObjectRequest jsonRequest;
 
     public UserService(Context context) {
         super(context);

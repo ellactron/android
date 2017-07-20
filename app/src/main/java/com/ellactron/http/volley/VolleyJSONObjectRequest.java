@@ -4,18 +4,16 @@ import android.content.Context;
 import android.content.res.Resources;
 
 import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.ellactron.activities.R;
 
 import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import com.ellactron.activities.R;
 
 /**
  * Created by ji.wang on 2017-06-08.

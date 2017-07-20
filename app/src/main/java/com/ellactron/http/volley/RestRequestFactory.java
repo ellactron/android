@@ -14,11 +14,9 @@ import java.util.Map;
  * Created by ji.wang on 2017-07-11.
  */
 
-public class RestRequestFactory {
-    static Context context;
-
+public class RestRequestFactory extends HttpRequestFactory{
     public RestRequestFactory(Context context) {
-        setContext(context);
+        super(context);
     }
 
     private synchronized void setContext(Context context) {

@@ -77,16 +77,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     Context context = null;
     UserService userService = null;
 
-    private void init(){
+    private void init() {
         context = this.getApplication().getApplicationContext();
         userService = new UserService(getApplicationContext());
     }
 
     public void setCredential(String email, String password) {
-        if(null != mEmailView) {
+        if (null != mEmailView) {
             mEmailView.setText(email);
         }
-        if(null != mPasswordView) {
+        if (null != mPasswordView) {
             mPasswordView.setText(password);
         }
     }
@@ -96,10 +96,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         super.onCreate(savedInstanceState);
 
         init();
-
         initialOAuth2Sdk();
 
         setContentView(R.layout.activity_login);
+
         // 注册登录按钮
         registerLogInButon();
 
@@ -139,19 +139,18 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
-        /*try {
+        try {
             showMainWindow();
         } catch (Exception e) {
             Log.d(this.getClass().getName(), e.getMessage());
             return;
-        }*/
+        }
     }
 
     public void showSignUpWindow() {
         Intent intent = new Intent(this, SignUpActivity.class);
         intent.putExtra("activity", this.getClass().getCanonicalName());
         startActivityForResult(intent, SIGN_UP_ACTIVITY_RETURN_CODE);
-        //finish();
     }
 
 
@@ -160,14 +159,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
-        switch (requestCode){
+        switch (requestCode) {
             case SIGN_UP_ACTIVITY_RETURN_CODE:
                 try {
                     JSONObject credentialObject = new JSONObject(intent.getStringExtra("credential"));
                     JSONObject accountObject = credentialObject.getJSONObject("account");
                     setCredential(accountObject.getString("username"), accountObject.getString("password"));
                     // TODO: Automatically login
-                    //
+                    attemptLogin();
                 } catch (JSONException e) {
                     Log.e(this.getClass().getName(), e.getMessage());
                 }
@@ -219,7 +218,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         }
     }
-
 
     /**
      * Attempts to sign in or register the account specified by the login form.
@@ -280,7 +278,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
-        return password.length() > 4;
+        return password.length() >= 8;
     }
 
     /**
@@ -394,22 +392,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             fb.registerSignInButton(new ParameterredCallback<String, Void>() {
                 @Override
                 public Void call(String accessToken) throws IOException, JSONException, InterruptedException {
-                    /*getTokenByOAuth2(accessToken,
-                            new ParameterredCallback<String, Void>() {
-                                @Override
-                                public Void call(String siteToken) throws Exception {
-                                    storeSiteToken(siteToken);
-                                    showMainWindow();
-                                    return null;
-                                }
-                            },
-                            new ParameterredCallback<Exception, Void>() {
-                                @Override
-                                public Void call(Exception exception) {
-                                    // TODO: Show login failed message
-                                    return null;
-                                }
-                            });*/
                     showMainWindow();
                     return null;
                 }
@@ -458,15 +440,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     public void showMainWindow() throws IOException, JSONException, InterruptedException {
         Object lock;
-
-        // TODO:
-        // 1. If site token is existing login by site token
-        // 2. else check OAuth2 token, if exits, login by access token and store site token
-        // 3. else return back to LoginActivity
-        // 4. else show MainActivity.
-
         String token = (String) ConfigurationStorage.getConfigurationStorage(context).get("token");
-        if(null == token) {
+        if (null == token) {
             String accessToken = (null == fb) ? null : fb.getAccessToken();
             if (null != accessToken) {
                 getTokenByOAuth2(accessToken,
@@ -481,19 +456,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         new ParameterredCallback<Exception, Void>() {
                             @Override
                             public Void call(Exception exception) {
-                                // TODO: Show login failed message
+                                mEmailView.setError(exception.getMessage());
+                                mEmailView.requestFocus();
                                 return null;
                             }
                         });
             }
+        } else {
+            startActivity(new Intent(this, HomeActivity.class));
+            finish();
         }
-
-        //if (isUserLoggedIn()) {
-        startActivity(new Intent(this, HomeActivity.class));
-        finish();
-        // } else {
-        //    TODO: ...
-        //}
     }
 
     /**
@@ -501,6 +473,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * the user.
      */
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+        final JSONObject[] registerResponse = {null};
+        final Exception[] exceptions = {null};
 
         private final String mEmail;
         private final String mPassword;
@@ -515,22 +489,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // TODO: attempt authentication against a network service.
 
             try {
-                // Simulate network access.
-                Thread.sleep(2000);
+                login(mEmail, mPassword);
             } catch (InterruptedException e) {
-                return false;
+                Log.d(this.getClass().getName(), e.getMessage());
+                exceptions[0] = e;
+            } catch (JSONException e) {
+                Log.d(this.getClass().getName(), e.getMessage());
+                exceptions[0] = e;
             }
-
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
-
-            // TODO: register the new account here.
-            return true;
+            return null == exceptions[0];
         }
 
         @Override
@@ -539,10 +506,29 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
 
             if (success) {
-                finish();
+                try {
+                    storeSiteToken((String) registerResponse[0].get("token"));
+                    showMainWindow();
+                    finish();
+                    return;
+                } catch (IOException e) {
+                    Log.e(this.getClass().getName(), e.getMessage());
+                    exceptions[0] = e;
+                } catch (JSONException e) {
+                    Log.e(this.getClass().getName(), e.getMessage());
+                    exceptions[0] = e;
+                } catch (InterruptedException e) {
+                    Log.e(this.getClass().getName(), e.getMessage());
+                    exceptions[0] = e;
+                }
+            }
+
+            if (exceptions[0] instanceof VolleyError) {
+                mEmailView.setError(getString(R.string.error_general_login_failure));
+                mEmailView.requestFocus();
             } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
+                mEmailView.setError(getString(R.string.error_incorrect_password));
+                mEmailView.requestFocus();
             }
         }
 
@@ -550,6 +536,35 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         protected void onCancelled() {
             mAuthTask = null;
             showProgress(false);
+        }
+
+        protected void login(String email, String password) throws InterruptedException, JSONException {
+            final Object lock = new Object();
+            final UserService userService = new UserService(getApplication().getApplicationContext());
+            userService.getToken(email, password,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            registerResponse[0] = response;
+                            synchronized (lock) {
+                                lock.notify();
+                            }
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Log.d(this.getClass().getName(), null == error.getMessage() ? error.toString() : error.getMessage());
+                            exceptions[0] = error;
+                            synchronized (lock) {
+                                lock.notify();
+                            }
+                        }
+                    });
+
+            synchronized (lock) {
+                lock.wait();
+            }
         }
     }
 }

@@ -35,6 +35,8 @@ android {
             res.srcDirs = ['src/test/res']
         }
     }
+
+    useLibrary  'org.apache.http.legacy'
 }
 
 dependencies {

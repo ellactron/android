@@ -3,6 +3,7 @@ package com.ellactron.services;
 import android.content.Context;
 
 import com.android.volley.RequestQueue;
+import com.ellactron.http.volley.RestRequestFactory;
 import com.ellactron.http.volley.VolleyRequestQueue;
 
 /**
@@ -11,6 +12,7 @@ import com.ellactron.http.volley.VolleyRequestQueue;
 
 public class RestService {
     protected static RequestQueue mQueue;
+    protected RestRequestFactory requestFactory;
     protected Context context;
 
     public RestService(Context context) {

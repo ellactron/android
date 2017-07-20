@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 
+import com.ellactron.activities.R;
 import com.ellactron.helpers.ParameterredCallback;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -14,8 +15,6 @@ import com.facebook.Profile;
 import com.facebook.ProfileTracker;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
-
-import com.ellactron.activities.R;
 /**
  * Created by ji.wang on 2017-05-26.
  */

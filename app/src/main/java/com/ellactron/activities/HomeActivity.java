@@ -1,15 +1,26 @@
 package com.ellactron.activities;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.webkit.WebView;
+import android.widget.LinearLayout;
 
-import com.ellactron.activities.R;
+public class HomeActivity extends WebViewBasedActivity {
+    @Override
+    protected int getActivityId() {
+        return R.layout.activity_home;
+    }
 
-public class HomeActivity extends AppCompatActivity {
+    @Override
+    void addWebView(WebView mWebView) {
+        LinearLayout baseLayout = (LinearLayout) findViewById(R.id.homeBaseLayout);
+        baseLayout.addView(mWebView);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
+
+        mWebView.getSettings().setJavaScriptEnabled(true);
+        mWebView.loadUrl("http://www.google.com");
     }
 }
