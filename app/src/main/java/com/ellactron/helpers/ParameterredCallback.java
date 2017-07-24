@@ -8,5 +8,9 @@ import java.util.concurrent.Callable;
 
 public abstract class ParameterredCallback<PARAM_TYPE, RETURN_TYPE> implements Callable<RETURN_TYPE> {
     public abstract RETURN_TYPE call(PARAM_TYPE params) throws Exception;
-    @Override public RETURN_TYPE call(){return null;}
+
+    @Override
+    public RETURN_TYPE call() {
+        return null;
+    }
 }

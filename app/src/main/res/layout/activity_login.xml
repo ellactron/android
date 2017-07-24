@@ -37,7 +37,7 @@
         android:layout_width="164dp"
         android:layout_height="95dp"
         app:srcCompat="@drawable/banner"
-        android:contentDescription="@string/banner_image"/>
+        android:contentDescription="@string/banner_image" />
 
     <ScrollView
         android:id="@+id/login_form"

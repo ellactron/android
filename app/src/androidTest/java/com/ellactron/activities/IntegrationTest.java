@@ -52,18 +52,18 @@ public class IntegrationTest {
     public void testRegister() throws InterruptedException, JSONException {
         final Object lock = new Object();
         final UserService userService = new UserService(appContext);
-        userService.register("newuser@domain.com","pa55w0rd",
+        userService.register("newuser@domain.com", "pa55w0rd",
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
                             Assert.assertNotNull(response.getInt("Id"));
                         } catch (JSONException e) {
-                            Log.d(this.getClass().getName(),(response).toString());
-                            Log.d(this.getClass().getName(),e.getMessage());
+                            Log.d(this.getClass().getName(), (response).toString());
+                            Log.d(this.getClass().getName(), e.getMessage());
                             fail();
                         }
-                        synchronized(lock) {
+                        synchronized (lock) {
                             lock.notify();
                         }
                     }
@@ -73,13 +73,13 @@ public class IntegrationTest {
                     public void onErrorResponse(VolleyError error) {
                         Log.d(this.getClass().getName(), error.getMessage());
                         fail();
-                        synchronized(lock) {
+                        synchronized (lock) {
                             lock.notify();
                         }
                     }
                 });
 
-        synchronized(lock) {
+        synchronized (lock) {
             lock.wait();
         }
     }
@@ -91,7 +91,7 @@ public class IntegrationTest {
             public void onErrorResponse(VolleyError error) {
                 Log.d(this.getClass().getName(), error.getMessage());
                 fail();
-                synchronized(lock) {
+                synchronized (lock) {
                     lock.notify();
                 }
             }
@@ -105,12 +105,12 @@ public class IntegrationTest {
             public void onErrorResponse(VolleyError error) {
                 try {
                     JSONObject errorObject = new JSONObject(new String(error.networkResponse.data, "UTF-8"));
-                    Assert.assertEquals("Invalid credential",errorObject.getString("message"));
+                    Assert.assertEquals("Invalid credential", errorObject.getString("message"));
                 } catch (Exception e) {
                     Log.d(this.getClass().getName(), error.getMessage());
                 }
 
-                synchronized(lock) {
+                synchronized (lock) {
                     lock.notify();
                 }
             }
@@ -119,26 +119,26 @@ public class IntegrationTest {
 
     public void getToken(String username, String password, Response.ErrorListener errorListener) throws InterruptedException {
         final UserService userService = new UserService(appContext);
-        userService.getToken(username,password,
+        userService.getToken(username, password,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.d(this.getClass().getName(),(response).toString());
+                        Log.d(this.getClass().getName(), (response).toString());
                         try {
                             Assert.assertNotNull(response.getString("token"));
                         } catch (JSONException e) {
-                            Log.d(this.getClass().getName(),(response).toString());
-                            Log.d(this.getClass().getName(),e.getMessage());
+                            Log.d(this.getClass().getName(), (response).toString());
+                            Log.d(this.getClass().getName(), e.getMessage());
                             fail();
                         }
-                        synchronized(lock) {
+                        synchronized (lock) {
                             lock.notify();
                         }
                     }
                 },
                 errorListener);
 
-        synchronized(lock) {
+        synchronized (lock) {
             lock.wait();
         }
     }
@@ -146,18 +146,18 @@ public class IntegrationTest {
     @Test
     public void testConfigurationStorage() throws IOException, JSONException {
         ConfigurationStorage configurationStorage = ConfigurationStorage.getConfigurationStorage(appContext);
-        configurationStorage.set("name1","value1");
-        configurationStorage.set("name2","value2");
+        configurationStorage.set("name1", "value1");
+        configurationStorage.set("name2", "value2");
 
         Assert.assertTrue(configurationStorage.getConfiguration().has("name1"));
         Assert.assertTrue(configurationStorage.getConfiguration().has("name2"));
-        Assert.assertEquals("value1",configurationStorage.getConfiguration().get("name1"));
+        Assert.assertEquals("value1", configurationStorage.getConfiguration().get("name1"));
 
         configurationStorage.remove("name1");
         Assert.assertFalse(configurationStorage.getConfiguration().has("name1"));
 
         configurationStorage.set("name2", "value2_changed");
-        Assert.assertEquals("value2_changed",configurationStorage.getConfiguration().get("name2"));
+        Assert.assertEquals("value2_changed", configurationStorage.getConfiguration().get("name2"));
 
         Log.d(this.getClass().getName(), configurationStorage.getConfiguration().toString());
 

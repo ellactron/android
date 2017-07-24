@@ -31,7 +31,6 @@ public class RestRequestFactory extends HttpRequestFactory{
                                                                      Response.Listener<JSONObject> listener,
                                                                      Response.ErrorListener errorListener) {
         return new VolleyJSONObjectRequest(
-                context,
                 method,
                 serviceName,
                 headers,
@@ -48,7 +47,6 @@ public class RestRequestFactory extends HttpRequestFactory{
                                                              final Response.Listener<JSONObject> listener,
                                                              Response.ErrorListener errorListener) {
         return new VolleyStringRequest(
-                context,
                 method,
                 serviceName,
                 headers,

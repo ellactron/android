@@ -34,7 +34,7 @@ public abstract class WebViewBasedActivity extends BaseActivity {
 
     private WebView createWebView() {
         mWebView = new WebView(this);
-        mWebView.setWebViewClient(new WebViewClient(){
+        mWebView.setWebViewClient(new WebViewClient() {
             /*@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest req) {
@@ -49,15 +49,13 @@ public abstract class WebViewBasedActivity extends BaseActivity {
             @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest req) {
-                if(req.getUrl().toString().contains(getResources().getString(R.string.hostname))){
-                    if(req.getUrl().toString().contains(getResources().getString(R.string.hostname) + localResource)){
+                if (req.getUrl().toString().contains(getResources().getString(R.string.hostname))) {
+                    if (req.getUrl().toString().contains(getResources().getString(R.string.hostname) + localResource)) {
                         return localRequest(req);
-                    }
-                    else {
+                    } else {
                         return interceptRequest(req);
                     }
-                }
-                else
+                } else
                     return super.shouldInterceptRequest(view, req);
             }
         });
@@ -72,9 +70,9 @@ public abstract class WebViewBasedActivity extends BaseActivity {
             HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
 
             conn.setRequestMethod(req.getMethod().toUpperCase());
-            conn.setRequestProperty("Authorization", "Bearer "+getSiteToken());
+            conn.setRequestProperty("Authorization", "Bearer " + getSiteToken());
 
-            switch(req.getMethod().toUpperCase()){
+            switch (req.getMethod().toUpperCase()) {
                 case "POST":
                 case "PUT":
                     conn.setDoOutput(true);
@@ -91,7 +89,7 @@ public abstract class WebViewBasedActivity extends BaseActivity {
 
             InputStream in = null;
             int responseCode = conn.getResponseCode();
-            if(responseCode!=200)
+            if (responseCode != 200)
                 in = conn.getErrorStream();
             else {
                 in = conn.getInputStream();
@@ -99,8 +97,7 @@ public abstract class WebViewBasedActivity extends BaseActivity {
             String contentTypeValue = "text/html; charset=UTF-8";//conn.getContentType();
             String encodingValue = conn.getContentEncoding();
             return new WebResourceResponse(contentTypeValue, encodingValue, in);
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             Log.e(this.getClass().getName(), e.getMessage());
             return null;
         }
@@ -152,9 +149,9 @@ public abstract class WebViewBasedActivity extends BaseActivity {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private WebResourceResponse localRequest(WebResourceRequest req) {
         String path = req.getUrl().toString();
-        path = path.substring(path.indexOf(localResource)+localResource.length());
+        path = path.substring(path.indexOf(localResource) + localResource.length());
         int resourceId = getResourceId(path, Drawable.class);
-        if(0 == resourceId)
+        if (0 == resourceId)
             return null;
 
         InputStream raw = getResources().openRawResource(resourceId);
@@ -166,7 +163,7 @@ public abstract class WebViewBasedActivity extends BaseActivity {
             int id = this.getResources().getIdentifier(resName,
                     "drawable",
                     this.getPackageName());
-            if (id == 0 && resName.contains(".")){
+            if (id == 0 && resName.contains(".")) {
                 id = this.getResources().getIdentifier(resName.substring(0,
                         resName.indexOf(".")),
                         "drawable",

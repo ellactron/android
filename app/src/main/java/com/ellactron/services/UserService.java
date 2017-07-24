@@ -5,6 +5,7 @@ import android.content.Context;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.ellactron.activities.R;
+import com.ellactron.configuration.AppConfiguration;
 import com.ellactron.http.volley.RestRequestFactory;
 import com.ellactron.http.volley.VolleyStringRequest;
 
@@ -12,16 +13,18 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+
 /**
  * Created by ji.wang on 2017-07-10.
  */
 
 public class UserService extends RestService {
-    //private VolleyJSONObjectRequest jsonRequest;
+    private AppConfiguration appConfiguration = null;
 
     public UserService(Context context) {
         super(context);
         requestFactory = new RestRequestFactory(context);
+        appConfiguration = AppConfiguration.CreateConfiguration(context);
     }
 
     public void register(String username,
@@ -34,7 +37,7 @@ public class UserService extends RestService {
 
         final VolleyStringRequest jsonRequest = requestFactory.getStringRequest(
                 Request.Method.POST,
-                context.getString(R.string.register_service),
+                getUserServiceURL(R.string.register_service),
                 null,
                 params,
                 listener,
@@ -54,7 +57,7 @@ public class UserService extends RestService {
 
         final VolleyStringRequest jsonRequest = requestFactory.getStringRequest(
                 Request.Method.POST,
-                context.getString(R.string.token_service),
+                getUserServiceURL(R.string.token_service),
                 null,
                 params,
                 listener,
@@ -65,11 +68,11 @@ public class UserService extends RestService {
     }
 
     public void getSiteTokenByOAuth2Token(String oauth2token,
-                         final Response.Listener<JSONObject> listener,
-                         Response.ErrorListener errorListener) {
+                                          final Response.Listener<JSONObject> listener,
+                                          Response.ErrorListener errorListener) {
         final VolleyStringRequest jsonRequest = requestFactory.getStringRequest(
                 Request.Method.PUT,
-                context.getString(R.string.facebook_auth) + "/" + oauth2token,
+                getUserServiceURL(R.string.facebook_auth) + "/" + oauth2token,
                 null,
                 null,
                 listener,
@@ -77,5 +80,9 @@ public class UserService extends RestService {
         jsonRequest.setTag("REQUEST_TAG");
 
         this.mQueue.add(jsonRequest);
+    }
+
+    private String getUserServiceURL(int serviceId) {
+        return appConfiguration.getUserServiceBaseUrl() + "/" + context.getString(serviceId);
     }
 }

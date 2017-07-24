@@ -17,7 +17,7 @@ public class RestService {
 
     public RestService(Context context) {
         this.context = context;
-        if(null == mQueue)
+        if (null == mQueue)
             mQueue = VolleyRequestQueue.getInstance(context).getRequestQueue();
     }
 }

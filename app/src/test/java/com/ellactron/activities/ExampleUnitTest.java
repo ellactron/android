@@ -15,6 +15,6 @@ public class ExampleUnitTest {
         assertEquals(4, 2 + 2);
     }
 
-    String username="test@domain.com";
+    String username = "test@domain.com";
     String password = "pa55w0rd";
 }

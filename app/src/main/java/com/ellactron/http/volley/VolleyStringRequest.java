@@ -5,7 +5,6 @@ import android.content.Context;
 import com.android.volley.Response;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
-import com.ellactron.activities.R;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,39 +13,18 @@ import java.util.Map;
  */
 
 public class VolleyStringRequest extends StringRequest {
-    final static String PROTOCOL_SCHEME="https://";
-    final static String SERVICE_PORT="8443";
-
     static Context context;
     Map<String, String> params;
     Map<String, String> headers = new HashMap<String, String>();;
 
-    /*public String getBaseRestUrl() {
-        return getBaseUrl() + Resources.getSystem().getString(R.string.rest_base);
-    }*/
-
-    /*public String getRestUrl() {
-        return Resources.getSystem().getString(R.string.base_url);
-    }*/
-
-    private static String getBaseUrl(Context context) {
-        VolleyStringRequest.context = context;
-        return  PROTOCOL_SCHEME + context.getString(R.string.hostname)+ ":" +SERVICE_PORT;
-    }
-
-    public static String getBaseUrl() {
-        return getBaseUrl(VolleyStringRequest.context);
-    }
-
-    VolleyStringRequest(Context context,
-                               int method,
+    VolleyStringRequest(int method,
                                String serviceUrl,
                                Map<String, String> headers,
                                Map<String, String> params,
                                Response.Listener<String> listener,
                                Response.ErrorListener errorListener) {
         super(method,
-                getBaseUrl(context) + serviceUrl,
+                serviceUrl,
                 listener, errorListener);
 
         if(null != params)
@@ -57,7 +35,7 @@ public class VolleyStringRequest extends StringRequest {
             this.headers.putAll(headers);
 
         VolleyLog.d("Adding request: %s",
-                getBaseUrl() + serviceUrl);
+                serviceUrl);
     }
 
     VolleyStringRequest(String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {

@@ -50,6 +50,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     protected abstract int getActivityId();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,7 +92,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             Log.e(this.getClass().getName(), e.getMessage());
         }
 
-        if(null != fb && null != fb.getFacebookProfile())
+        if (null != fb && null != fb.getFacebookProfile())
             fb.getFacebookProfile().setCurrentProfile(null);
 
         startActivity(new Intent(this, LoginActivity.class));

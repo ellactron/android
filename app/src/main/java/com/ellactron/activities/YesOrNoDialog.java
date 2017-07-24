@@ -13,13 +13,13 @@ import android.util.Log;
 public class YesOrNoDialog {
     public static void show(Activity parent,
                             Integer message,
-                       Integer title,
-                       DialogInterface.OnClickListener onOk,
-                       DialogInterface.OnClickListener onCancel) {
+                            Integer title,
+                            DialogInterface.OnClickListener onOk,
+                            DialogInterface.OnClickListener onCancel) {
         AlertDialog.Builder builder = new AlertDialog.Builder(parent);
         builder.setIcon(R.mipmap.ic_alert);
 
-        if(null != title)
+        if (null != title)
             builder.setTitle(title);
 
         builder.setMessage(message)
@@ -29,8 +29,7 @@ public class YesOrNoDialog {
 
         try {
             dialog.show();
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             Log.e(YesOrNoDialog.class.getName(), e.getMessage());
         }
     }

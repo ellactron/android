@@ -327,10 +327,10 @@ public class SignUpActivity extends AppCompatActivity implements LoaderCallbacks
             if (success) {
                 Intent intent = getIntent();
                 String activityName = intent.getStringExtra("activity");
-                if(activityName.equals(LoginActivity.class.getCanonicalName())){
+                if (activityName.equals(LoginActivity.class.getCanonicalName())) {
                     Intent newIntent = new Intent();
                     try {
-                        registerResponse[0].getJSONObject("account").put("password",mPassword);
+                        registerResponse[0].getJSONObject("account").put("password", mPassword);
                     } catch (JSONException e) {
                         Log.e(this.getClass().getName(), e.getMessage());
                     }
@@ -339,11 +339,10 @@ public class SignUpActivity extends AppCompatActivity implements LoaderCallbacks
                 }
                 finish();
             } else {
-                if(exceptions[0] instanceof VolleyError){
+                if (exceptions[0] instanceof VolleyError) {
                     mPasswordView.setError(getString(R.string.error_general_register_failure));
                     mPasswordView.requestFocus();
-                }
-                else {
+                } else {
                     mPasswordView.setError(getString(R.string.error_incorrect_password));
                     mPasswordView.requestFocus();
                 }
@@ -359,12 +358,12 @@ public class SignUpActivity extends AppCompatActivity implements LoaderCallbacks
         protected void register(String email, String password) throws InterruptedException, JSONException {
             final Object lock = new Object();
             final UserService userService = new UserService(getApplication().getApplicationContext());
-            userService.register(email,password,
+            userService.register(email, password,
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
                             registerResponse[0] = response;
-                            synchronized(lock) {
+                            synchronized (lock) {
                                 lock.notify();
                             }
                         }
@@ -372,15 +371,15 @@ public class SignUpActivity extends AppCompatActivity implements LoaderCallbacks
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            Log.d(this.getClass().getName(), null==error.getMessage()?error.toString():error.getMessage());
+                            Log.d(this.getClass().getName(), null == error.getMessage() ? error.toString() : error.getMessage());
                             exceptions[0] = error;
-                            synchronized(lock) {
+                            synchronized (lock) {
                                 lock.notify();
                             }
                         }
                     });
 
-            synchronized(lock) {
+            synchronized (lock) {
                 lock.wait();
             }
         }

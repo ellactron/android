@@ -13,7 +13,7 @@ import java.io.IOException;
  * Created by ji.wang on 2017-07-13.
  */
 
-public class ConfigurationStorage extends PrivateStorage{
+public class ConfigurationStorage extends PrivateStorage {
     static ConfigurationStorage configurationStorage = null;
     static JSONObject configJson = null;
 
@@ -22,13 +22,12 @@ public class ConfigurationStorage extends PrivateStorage{
     }
 
     public static synchronized ConfigurationStorage getConfigurationStorage(Context context) throws IOException, JSONException {
-        if(null == configurationStorage){
+        if (null == configurationStorage) {
             configurationStorage = new ConfigurationStorage(context, "data");
             try {
                 String configString = new String(configurationStorage.read(), "UTF-8");
                 configJson = new JSONObject(configString);
-            }
-            catch(FileNotFoundException e){
+            } catch (FileNotFoundException e) {
                 Log.w(ConfigurationStorage.class.getName(), "configuration file has not been created yet.");
                 configJson = new JSONObject();
             }
@@ -47,12 +46,11 @@ public class ConfigurationStorage extends PrivateStorage{
     }
 
     public Object get(String key) throws JSONException {
-        Object value= null;
+        Object value = null;
         try {
             value = configJson.get(key);
-        }
-        catch(JSONException e){
-            if(e.getMessage().equals("No value for " + key))
+        } catch (JSONException e) {
+            if (e.getMessage().equals("No value for " + key))
                 Log.d(this.getClass().getName(), e.getMessage());
             else
                 throw e;

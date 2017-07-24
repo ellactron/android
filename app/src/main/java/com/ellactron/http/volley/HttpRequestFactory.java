@@ -29,7 +29,6 @@ public class HttpRequestFactory {
                                                              final Response.Listener<String> listener,
                                                              Response.ErrorListener errorListener) {
         return new VolleyStringRequest(
-                context,
                 method,
                 serviceName,
                 headers,

@@ -39,8 +39,8 @@ public class PrivateStorage {
     }
 
     protected synchronized static void append(Context context,
-                                            byte[] data,
-                                            String storagePath) throws IOException {
+                                              byte[] data,
+                                              String storagePath) throws IOException {
         save(context, data, storagePath, true);
     }
 
@@ -49,10 +49,9 @@ public class PrivateStorage {
                                             String storagePath,
                                             boolean append) throws IOException {
         FileOutputStream fos;
-        if(append) {
-            fos = context.openFileOutput(storagePath, MODE_PRIVATE|MODE_APPEND);
-        }
-        else {
+        if (append) {
+            fos = context.openFileOutput(storagePath, MODE_PRIVATE | MODE_APPEND);
+        } else {
             fos = context.openFileOutput(storagePath, MODE_PRIVATE);
         }
 
@@ -62,6 +61,7 @@ public class PrivateStorage {
         fos.flush();
         fos.close();
     }
+
     public byte[] read() throws IOException {
         return read(context, storagePath, -1, 0);
     }
@@ -72,20 +72,20 @@ public class PrivateStorage {
 
     public byte[] read(int length,
                        int offset) throws IOException {
-        return read(context, storagePath,length,offset);
+        return read(context, storagePath, length, offset);
     }
 
     protected synchronized static byte[] read(Context context,
                                               String storagePath,
                                               int length) throws IOException {
-        return read(context, storagePath,length,0);
+        return read(context, storagePath, length, 0);
     }
 
     protected synchronized static byte[] read(Context context,
-                                            String storagePath,
+                                              String storagePath,
                                               int length,
                                               int offset) throws IOException {
-        if(-1 == length){
+        if (-1 == length) {
             length = (int) (new File(getAbsoluteFilePath(context, storagePath))).length();
         }
 
@@ -114,14 +114,14 @@ public class PrivateStorage {
     }
 
     protected static boolean isExisting(Context context,
-                                     String storagePath) {
+                                        String storagePath) {
         File file = new File(getAbsoluteFilePath(context, storagePath));
         return file.exists();
     }
 
     private static String getAbsoluteFilePath(Context context,
-                                              String storagePath){
+                                              String storagePath) {
         return context.getFilesDir()
-                + (storagePath.startsWith("/")?storagePath:"/" + storagePath);
+                + (storagePath.startsWith("/") ? storagePath : "/" + storagePath);
     }
 }
