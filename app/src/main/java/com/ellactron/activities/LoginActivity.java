@@ -33,6 +33,7 @@ import android.widget.TextView;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.ellactron.helpers.ParameterredCallback;
+import com.ellactron.http.security.HttpSecurityContext;
 import com.ellactron.services.UserService;
 import com.ellactron.services.auth.FacebookSignIn;
 import com.ellactron.storage.ConfigurationStorage;
@@ -41,8 +42,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.crypto.NoSuchPaddingException;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -77,9 +88,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     Context context = null;
     UserService userService = null;
 
-    private void init() {
+    private void init() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, KeyManagementException, InvalidAlgorithmParameterException, InvalidKeySpecException, InvalidKeyException, NoSuchPaddingException, UnrecoverableKeyException {
         context = this.getApplication().getApplicationContext();
         userService = new UserService(getApplicationContext());
+        HttpSecurityContext.InitSSLContext();
     }
 
     public void setCredential(String email, String password) {
@@ -95,7 +107,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        init();
+        try {
+            init();
+        } catch (Exception e) {
+            Log.e(this.getClass().getName(), e.getMessage());
+            System.exit(1);
+        }
         initialOAuth2Sdk();
 
         setContentView(R.layout.activity_login);

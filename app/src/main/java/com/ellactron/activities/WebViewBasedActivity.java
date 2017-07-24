@@ -10,15 +10,11 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.impl.client.DefaultHttpClient;
-
+import java.io.DataOutputStream;
 import java.io.InputStream;
+import java.net.URL;
+
+import javax.net.ssl.HttpsURLConnection;
 
 /**
  * Created by ji.wang on 2017-07-19.
@@ -61,8 +57,8 @@ public abstract class WebViewBasedActivity extends BaseActivity {
                         return interceptRequest(req);
                     }
                 }
-
-                return super.shouldInterceptRequest(view, req);
+                else
+                    return super.shouldInterceptRequest(view, req);
             }
         });
 
@@ -71,7 +67,45 @@ public abstract class WebViewBasedActivity extends BaseActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private WebResourceResponse interceptRequest(WebResourceRequest req) {
-        HttpResponse httpReponse = null;
+        try {
+            URL url = new URL(req.getUrl().toString());
+            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+
+            conn.setRequestMethod(req.getMethod().toUpperCase());
+            conn.setRequestProperty("Authorization", "Bearer "+getSiteToken());
+
+            switch(req.getMethod().toUpperCase()){
+                case "POST":
+                case "PUT":
+                    conn.setDoOutput(true);
+                    DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+                    //wr.writeBytes(urlParameters);
+                    wr.flush();
+                    wr.close();
+                    break;
+                case "GET":
+                case "DELETE":
+                default:
+                    break;
+            }
+
+            InputStream in = null;
+            int responseCode = conn.getResponseCode();
+            if(responseCode!=200)
+                in = conn.getErrorStream();
+            else {
+                in = conn.getInputStream();
+            }
+            String contentTypeValue = "text/html; charset=UTF-8";//conn.getContentType();
+            String encodingValue = conn.getContentEncoding();
+            return new WebResourceResponse(contentTypeValue, encodingValue, in);
+        }
+        catch(Exception e) {
+            Log.e(this.getClass().getName(), e.getMessage());
+            return null;
+        }
+
+        /*HttpResponse httpReponse = null;
 
         try {
             DefaultHttpClient client = new DefaultHttpClient();
@@ -112,7 +146,7 @@ public abstract class WebViewBasedActivity extends BaseActivity {
         catch(Exception e){
             Log.e(this.getClass().getName(), e.getMessage());
             return null;
-        }
+        }*/
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)

@@ -1,7 +1,6 @@
 package com.ellactron.http.volley;
 
 import android.content.Context;
-import android.content.res.Resources;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
@@ -20,14 +19,27 @@ import java.util.Map;
  */
 
 public class VolleyJSONObjectRequest extends JsonObjectRequest {
+    final static String PROTOCOL_SCHEME="https://";
+    final static String SERVICE_PORT="8443";
+
+    static Context context;
     Map<String, String> headers = new HashMap<String, String>();
 
-    public String getBaseRestUrl() {
+    /*public String getBaseRestUrl() {
         return getRestUrl() + Resources.getSystem().getString(R.string.rest_base);
     }
 
     public String getRestUrl() {
         return Resources.getSystem().getString(R.string.base_url);
+    }*/
+
+    private static String getBaseUrl(Context context) {
+        VolleyStringRequest.context = context;
+        return  PROTOCOL_SCHEME + context.getString(R.string.hostname) + ":" +SERVICE_PORT;
+    }
+
+    public static String getBaseUrl() {
+        return getBaseUrl(VolleyStringRequest.context);
     }
 
     VolleyJSONObjectRequest(Context context,
@@ -38,7 +50,7 @@ public class VolleyJSONObjectRequest extends JsonObjectRequest {
                             Response.Listener<JSONObject> listener,
                             Response.ErrorListener errorListener) {
         super(method,
-                context.getString(R.string.base_url) + serviceUrl,
+                getBaseUrl(context) + serviceUrl,
                 params,
                 listener,
                 errorListener);
@@ -47,8 +59,8 @@ public class VolleyJSONObjectRequest extends JsonObjectRequest {
         if (null != headers)
             this.headers.putAll(headers);
 
-        VolleyLog.d("Adding request: %s", context.getString(R.string.base_url)
-                + serviceUrl);
+        VolleyLog.d("Adding request: %s",
+                getBaseUrl() + serviceUrl);
     }
 
     @Override

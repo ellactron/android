@@ -21,6 +21,6 @@ public class HomeActivity extends WebViewBasedActivity {
         super.onCreate(savedInstanceState);
 
         mWebView.getSettings().setJavaScriptEnabled(true);
-        mWebView.loadUrl("http://www.google.com");
+        mWebView.loadUrl("https://"+ getApplicationContext().getString(R.string.hostname)+":8443/rest/v1/user");
     }
 }
