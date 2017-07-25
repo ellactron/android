@@ -29,14 +29,6 @@
     </string>
     <string name="copyright">NewBeem Cop. 2017</string>
 
-    <!-- Rest service -->
-    <string name="hostname">10.192.113.128</string>
-    <string name="rest_base">/rest/v1</string>
-    <string name="register_service">/register</string>
-    <string name="token_service">/login/token</string>
-    <string name="facebook_auth">/login/facebook/accesstoken</string>
-    <string name="facebook_app_id">1916572711894629</string>
-
     <!-- Menu item string -->
     <string name="main_menu_item_about">About</string>
     <string name="main_menu_item_add_new">Add New</string>

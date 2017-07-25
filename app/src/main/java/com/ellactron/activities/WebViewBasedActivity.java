@@ -1,5 +1,6 @@
 package com.ellactron.activities;
 
+import android.content.res.AssetManager;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
@@ -22,18 +24,27 @@ import javax.net.ssl.HttpsURLConnection;
 
 public abstract class WebViewBasedActivity extends BaseActivity {
     WebView mWebView = null;
-    final String localResource = "/local/";
+    final String[] localResources = {/*"/static/","/js/", "/local/","/images/"*/};
+
+    AssetManager assetManager;
 
     abstract void addWebView(WebView mWebView);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        assetManager = getAssets();
         addWebView(createWebView());
     }
 
     private WebView createWebView() {
         mWebView = new WebView(this);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            if (0 != (getApplicationInfo().flags & getApplicationInfo().FLAG_DEBUGGABLE))
+            { WebView.setWebContentsDebuggingEnabled(true); }
+        }
+
         mWebView.setWebViewClient(new WebViewClient() {
             /*@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
@@ -50,11 +61,17 @@ public abstract class WebViewBasedActivity extends BaseActivity {
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest req) {
                 if (req.getUrl().toString().contains(getResources().getString(R.string.hostname))) {
-                    if (req.getUrl().toString().contains(getResources().getString(R.string.hostname) + localResource)) {
-                        return localRequest(req);
-                    } else {
-                        return interceptRequest(req);
+                    for(String localResource: localResources){
+                        if (req.getUrl().toString().contains(localResource)) {
+                            try {
+                                return localRequest(req, localResource);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                return null;
+                            }
+                        }
                     }
+                    return interceptRequest(req);
                 } else
                     return super.shouldInterceptRequest(view, req);
             }
@@ -101,61 +118,52 @@ public abstract class WebViewBasedActivity extends BaseActivity {
             Log.e(this.getClass().getName(), e.getMessage());
             return null;
         }
-
-        /*HttpResponse httpReponse = null;
-
-        try {
-            DefaultHttpClient client = new DefaultHttpClient();
-            switch(req.getMethod().toUpperCase()){
-                case "GET":
-                    HttpGet httpGet = new HttpGet(req.getUrl().toString());
-                    httpGet.setHeader("Authorization", "Bearer "+getSiteToken());
-                    httpReponse = client.execute(httpGet);
-                case "PUT":
-                    HttpPut httpPut = new HttpPut(req.getUrl().toString());
-                    httpPut.setHeader("Authorization", "Bearer "+getSiteToken());
-                    httpReponse = client.execute(httpPut);
-                case "POST":
-                    HttpPost httpPost = new HttpPost(req.getUrl().toString());
-                    httpPost.setHeader("Authorization", "Bearer "+getSiteToken());
-                    httpReponse = client.execute(httpPost);
-                case "DELETE":
-                    HttpDelete httpDelete = new HttpDelete(req.getUrl().toString());
-                    httpDelete.setHeader("Authorization", "Bearer "+getSiteToken());
-                    httpReponse = client.execute(httpDelete);
-            }
-
-            Header contentType = httpReponse.getEntity().getContentType();
-            Header encoding = httpReponse.getEntity().getContentEncoding();
-            InputStream responseInputStream = httpReponse.getEntity().getContent();
-
-            String contentTypeValue = null;
-            String encodingValue = null;
-            if (contentType != null) {
-                contentTypeValue = contentType.getValue();
-            }
-            if (encoding != null) {
-                encodingValue = encoding.getValue();
-            }
-
-            return new WebResourceResponse(contentTypeValue, encodingValue, responseInputStream);
-        }
-        catch(Exception e){
-            Log.e(this.getClass().getName(), e.getMessage());
-            return null;
-        }*/
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private WebResourceResponse localRequest(WebResourceRequest req) {
+    private WebResourceResponse localRequest(WebResourceRequest req, String localResource) throws IOException {
         String path = req.getUrl().toString();
-        path = path.substring(path.indexOf(localResource) + localResource.length());
-        int resourceId = getResourceId(path, Drawable.class);
-        if (0 == resourceId)
-            return null;
+        path = path.substring(path.indexOf(localResource)+1);
+        InputStream raw = assetManager.open(path);
 
-        InputStream raw = getResources().openRawResource(resourceId);
-        return new WebResourceResponse("image/png", "UTF-8", raw);
+        return new WebResourceResponse(getMimeType(path), "UTF-8", raw);
+    }
+
+    private String getMimeType(String path) {
+        String ext = path.substring(path.lastIndexOf('.'));
+        switch(ext){
+            case ".html":
+            case ".htm":
+                return "text/html";
+            case ".css":
+                return "text/css";
+            case ".js":
+                return "application/javascript";
+            case ".png":
+                return "image/png";
+            case ".jpg":
+            case ".jpeg":
+                return "image/jpeg";
+            case ".gif":
+                return "image/gif";
+            case ".xhtml":
+                return "application/xhtml+xml";
+            case ".xml":
+                return "application/xml";
+            case ".json":
+                return "application/json";
+            case ".mpeg":
+                return "video/mpeg";
+            case ".aac":
+                return "audio/aac";
+            case ".mid":
+            case ".midi":
+                return "audio/midi";
+            case ".wav":
+                return "audio/x-wav";
+            default:
+                return null;
+        }
     }
 
     private int getResourceId(String resName, Class<?> c) {

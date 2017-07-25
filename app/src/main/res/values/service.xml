@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Rest service -->
+    <string name="hostname">192.168.10.54</string>
+    <string name="rest_base">/rest/v1</string>
+    <string name="register_service">/register</string>
+    <string name="token_service">/login/token</string>
+    <string name="facebook_auth">/login/facebook/accesstoken</string>
+    <string name="facebook_app_id">1916572711894629</string>
+</resources>

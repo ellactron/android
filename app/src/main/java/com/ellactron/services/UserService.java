@@ -19,12 +19,13 @@ import java.util.Map;
  */
 
 public class UserService extends RestService {
-    private AppConfiguration appConfiguration = null;
-
     public UserService(Context context) {
         super(context);
-        requestFactory = new RestRequestFactory(context);
-        appConfiguration = AppConfiguration.CreateConfiguration(context);
+    }
+
+    protected String getUserServiceURL(int serviceId) {
+        return appConfiguration.getUserServiceBaseUrl() +
+                context.getString(serviceId);
     }
 
     public void register(String username,
@@ -80,9 +81,5 @@ public class UserService extends RestService {
         jsonRequest.setTag("REQUEST_TAG");
 
         this.mQueue.add(jsonRequest);
-    }
-
-    private String getUserServiceURL(int serviceId) {
-        return appConfiguration.getUserServiceBaseUrl() + "/" + context.getString(serviceId);
     }
 }

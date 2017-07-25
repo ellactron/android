@@ -7,6 +7,8 @@ import com.ellactron.activities.R;
 import org.apache.commons.codec.binary.Base64;
 
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by ji.wang on 2017-07-24.
@@ -14,6 +16,8 @@ import java.io.UnsupportedEncodingException;
 
 public class AppConfiguration {
     static private AppConfiguration appConfiguration;
+
+    private Map<String, ServiceSchema> serviceSchemaMap = new HashMap<String, ServiceSchema>();
 
     public static synchronized AppConfiguration CreateConfiguration(Context context) {
         if (null == appConfiguration) {
@@ -23,11 +27,53 @@ public class AppConfiguration {
         return appConfiguration;
     }
 
-    private Context context;
-
     private AppConfiguration(Context context) {
         this.context = context;
+        initServiceSchema();
     }
+
+    final String UserServiceName = "UserService";
+    final String UIServiceName = "UIService";
+
+    private void initServiceSchema() {
+        serviceSchemaMap.put(UserServiceName,
+                new ServiceSchema("https",
+                        context.getString(R.string.hostname),
+                        8443,
+                        true,
+                        true));
+        serviceSchemaMap.put(UIServiceName,
+                new ServiceSchema("http",
+                        context.getString(R.string.hostname),
+                        8084,
+                        false,
+                        false));
+    }
+
+    /*public boolean requestClientCertificate(String serviceName){
+        return serviceSchemaMap.get(serviceName).getRequestClientCert();
+    }
+
+    public boolean requestAuthentication(String serviceName){
+        return serviceSchemaMap.get(serviceName).getRequestAuth();
+    }*/
+
+    public String getUserServiceBaseUrl() {
+        return getServiceUrl(UserServiceName);
+    }
+
+    public String getUIServiceBaseUrl() {
+        return getServiceUrl(UIServiceName);
+    }
+
+    private String getServiceUrl(String serviceName) {
+        ServiceSchema schema = serviceSchemaMap.get(serviceName);
+        return schema.getProtocol() + "://" +
+                schema.getHostname() + ":" +
+                schema.getPort();
+    }
+
+    private Context context;
 
     final static private String KEY_PASSPHASE = "pa55w0rd";
 
@@ -126,19 +172,5 @@ public class AppConfiguration {
 
     public static byte[] getCertificates() {
         return CLIENT_CERTIFICATE.getBytes();
-    }
-
-    final static String PROTOCOL_SCHEME = "https://";
-
-    final static String USER_SERVICE_PORT = "8443";
-
-    public String getUserServiceBaseUrl() {
-        return PROTOCOL_SCHEME + context.getString(R.string.hostname) + ":" + USER_SERVICE_PORT;
-    }
-
-    final static String UI_SERVICE_PORT = "8444";
-
-    public String getUIServiceBaseUrl() {
-        return PROTOCOL_SCHEME + context.getString(R.string.hostname) + ":" + UI_SERVICE_PORT;
     }
 }

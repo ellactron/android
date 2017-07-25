@@ -1,0 +1,127 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Doughnut Chart</title>
+    <script src="js/chart/2.6.0/Chart.bundle.js"></script>
+    <script src="js/utils.js"></script>
+	<link href="https://fonts.googleapis.com/css?family=Rajdhani" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=PT+Sans+Caption" rel="stylesheet">
+    <style>
+    canvas {
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+    }
+    </style>
+	
+	<link rel="stylesheet" type="text/css" href="css/meter.css">
+</head>
+
+<body>
+    <div id="summary-canvas" style="width:93%; margin: 0px auto; background-color:#f8f8f8; padding: 2% 2%;" >
+		<div>
+			<!-- button id="updateData">Update Data</button>
+			<button id="addData">Add Data</button>
+			<button id="removeData">Remove Data</button>
+			<button id="addDataset">Add Dataset</button>
+			<button id="removeDataset">Remove Dataset</button -->
+			<canvas id="doughnut-chart-area"></canvas>
+			<script src="js/doughnut.js"></script>
+		</div>
+		<!-- div>
+			<button id="updateLineChartData">Update Data</button>
+			<button id="addLineChartDataset">Add Dataset</button>
+			<button id="removeLineChartDataset">Remove Dataset</button>
+			<button id="addLineChartDatasetData">Add Data</button>
+			<button id="removeLineChartDatasetData">Remove Data</button>
+			<canvas id="line-chart-area"></canvas>
+			<script src="js/linechart.js"></script>
+		</div -->
+		<div>
+			<!-- button id="updateLineComboChartData">Update Data</button>
+			<button id="addLineComboChartDataset">Add Dataset</button>
+			<button id="removeLineComboChartDataset">Remove Dataset</button>
+			<button id="addLineComboChartData">Add Data</button>
+			<button id="removeLineComboChartData">Remove Data</button -->
+			<canvas id="line-combo-chart-area"></canvas>
+			<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
+			<script src="js/linecombochart.js"></script>
+		</div>
+    </div>
+	
+	<div id="meter-canvas" style="width:98%; padding:2%;">
+		<div class="meter">
+			<div class="circle" style="-webkit-animation: loading 1s infinite linear; animation: loading 1 infinite linear;"></div>
+			<div class="digits">250</div>
+		</div>
+		<div class="meter">
+			<div class="circle" style="-webkit-animation: loading 60s infinite linear; animation: loading 60s infinite linear;"></div>
+			<div class="digits">1</div>
+		</div>
+		<div class="meter">
+			<div class="circle" style="-webkit-animation: loading 50s infinite linear; animation: loading 50s infinite linear;"></div>
+			<div class="digits">50</div>
+		</div>
+		<div class="meter">
+			<div class="circle" style="-webkit-animation: loading 99s infinite linear; animation: loading 99s infinite linear;"></div>
+			<div class="digits">1</div>
+		</div>
+		<div class="meter">
+			<div class="circle" style="-webkit-animation: loading 0s infinite linear; animation: loading 0s infinite linear;"></div>
+			<div class="digits">Off</div>
+		</div>
+		<div id="addMeter" class="addMeter" onclick="addMeter(randomScalingFactor(250))">
+			<div class="circle" style="-webkit-animation: loading 0s infinite linear; animation: loading 0s infinite linear;"></div>
+			<div class="digits">+</div>
+		</div>
+	</div>
+	<script src="js/meter.js"></script>
+
+	<script>
+	///////////////////////////////////////////////////////////////////////////////////
+	// Onload function
+	//
+	window.onload = function() {
+		initDoughnutChart();
+		///*window.myLine = */initLineChart();
+		initLineComboChart();
+	};
+	
+	///////////////////////////////////////////////////////////////////////////////////
+	// Timer
+	//
+	var isPaused = false;
+	myTimer = window.setInterval(function() {
+		if(false == isPaused) {
+			isPaused = true;
+			
+			var op = randomScalingFactor(2);
+			var index = randomScalingFactor(doughnutChartConfig.data.datasets[0].data.length);
+			//console.log(index);
+			
+			// Test summary chart
+			if(0 == op) {
+				removeData(index, 1);
+			}
+			else {
+				addData(randomScalingFactor(100));
+			}
+			updateData();
+			
+			// Test meter
+			if(0 == op) {
+				removeMeter(index);
+			}
+			else {
+				addMeter(randomScalingFactor(250));
+			}
+			
+			window.myDoughnut.update();
+			isPaused = false;
+		}
+	}, 1000);
+	</script>
+</body>
+
+</html>
