@@ -571,7 +571,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            Log.d(this.getClass().getName(), null == error.getMessage() ? error.toString() : error.getMessage());
+                            Log.e(this.getClass().getName(), null == error.getMessage() ? error.toString() : error.getMessage());
+                            error.printStackTrace();
                             exceptions[0] = error;
                             synchronized (lock) {
                                 lock.notify();

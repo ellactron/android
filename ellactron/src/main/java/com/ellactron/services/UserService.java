@@ -6,11 +6,13 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.ellactron.activities.R;
 import com.ellactron.configuration.AppConfiguration;
+import com.ellactron.http.security.HttpSecurityContext;
 import com.ellactron.http.volley.RestRequestFactory;
 import com.ellactron.http.volley.VolleyStringRequest;
 
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 

@@ -1,0 +1,37 @@
+<resources>
+    <string name="app_name">Ellactron</string>
+    <string name="banner_image">Banner</string>
+
+    <!-- Dialog and Button -->
+    <string name="button_ok">Ok</string>
+    <string name="button_cancel">Cancel</string>
+    <string name="dialog_logout_title">Logout</string>
+    <string name="dialog_logout_message">Are you sure you want logout?</string>
+    <string name="action_sign_in">Sign In</string>
+    <string name="action_sign_up">Sign Up</string>
+    <string name="action_sign_in_short">Sign In</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="title_activity_sign_up">Sign Up</string>
+    <string name="title_activity_sign_in">Sign In</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_general_register_failure">Register is failed, please retry again later.</string>
+    <string name="error_general_login_failure">Login is failed, please retry again later.</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email completions."
+    </string>
+    <string name="password_requirement">
+        Password must be at least 8 characters including at least one uppercase letter or one number
+    </string>
+    <string name="copyright">NewBeem Cop. 2017</string>
+
+    <!-- Menu item string -->
+    <string name="main_menu_item_about">About</string>
+    <string name="main_menu_item_add_new">Add New</string>
+    <string name="main_menu_item_share">Share</string>
+    <string name="main_menu_item_logout">Logout</string>
+</resources>

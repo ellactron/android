@@ -24,7 +24,7 @@ import javax.net.ssl.HttpsURLConnection;
 
 public abstract class WebViewBasedActivity extends BaseActivity {
     WebView mWebView = null;
-    final String[] localResources = {/*"/static/","/js/", "/local/","/images/"*/};
+    final String[] localResources = {"/static/","/js/", "/local/","/images/"};
 
     AssetManager assetManager;
 

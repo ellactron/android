@@ -32,7 +32,7 @@ public class ServiceSchema {
     }
 
     public String getPort() {
-        return 0==port?"8080":String.valueOf(port);
+        return 0==port?"8084":String.valueOf(port);
     }
 
     public Boolean getRequestClientCert() {

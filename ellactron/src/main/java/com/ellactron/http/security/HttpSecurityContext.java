@@ -3,8 +3,13 @@ package com.ellactron.http.security;
 import com.ellactron.configuration.AppConfiguration;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -24,6 +29,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import javax.crypto.Cipher;
 import javax.crypto.EncryptedPrivateKeyInfo;
@@ -35,6 +41,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 
 /**
@@ -43,6 +50,7 @@ import javax.net.ssl.TrustManagerFactory;
 
 public class HttpSecurityContext {
     final static private String KEY_TYPE = "RSA";
+    final static private String SSL_PROTOCOL = "TLSv1.2";
 
     public static void InitSSLContext()
             throws CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, InvalidKeySpecException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeyException, UnrecoverableKeyException {
@@ -56,7 +64,7 @@ public class HttpSecurityContext {
         TrustManagerFactory tmf = getTrustManagerFactory(chainList);
         KeyManagerFactory kmf = getKeyManagerFactory(chainList);
 
-        SSLContext context = SSLContext.getInstance("TLS");
+        SSLContext context = SSLContext.getInstance(SSL_PROTOCOL);
         context.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
 
         setDefaultSocketContext(context);
