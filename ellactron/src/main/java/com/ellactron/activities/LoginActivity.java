@@ -178,14 +178,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         switch (requestCode) {
             case SIGN_UP_ACTIVITY_RETURN_CODE:
-                try {
-                    JSONObject credentialObject = new JSONObject(intent.getStringExtra("credential"));
-                    JSONObject accountObject = credentialObject.getJSONObject("account");
-                    setCredential(accountObject.getString("username"), accountObject.getString("password"));
-                    // TODO: Automatically login
-                    attemptLogin();
-                } catch (JSONException e) {
-                    Log.e(this.getClass().getName(), e.getMessage());
+                if(null != intent) {
+                    try {
+                        JSONObject credentialObject = new JSONObject(intent.getStringExtra("credential"));
+                        JSONObject accountObject = credentialObject.getJSONObject("account");
+                        setCredential(accountObject.getString("username"), accountObject.getString("password"));
+                        // TODO: Automatically login
+                        attemptLogin();
+                    } catch (JSONException e) {
+                        Log.e(this.getClass().getName(), e.getMessage());
+                    }
                 }
             default:
                 if (null != fb)

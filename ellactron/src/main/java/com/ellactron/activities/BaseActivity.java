@@ -18,6 +18,10 @@ import static com.ellactron.activities.LoginActivity.fb;
  */
 
 public abstract class BaseActivity extends AppCompatActivity {
+    static int ADD_DEVICE_ACTIVITY_RETURN_CODE = 2;
+
+    protected abstract int getActivityId();
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
@@ -27,8 +31,14 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.main_menu_item_add_new:
+                addNewDevice();
+                break;
             case R.id.main_menu_item_logout:
                 logout();
+                break;
+            case R.id.main_menu_item_share:
+                share();
                 break;
             case R.id.main_menu_item_about:
                 Toast.makeText(this, "Selected options menu item: " + item.getTitle(), Toast.LENGTH_SHORT).show();
@@ -49,8 +59,6 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     }
 
-    protected abstract int getActivityId();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,10 +71,24 @@ public abstract class BaseActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
-    @Override
-    public boolean onSupportNavigateUp() {
-        Toast.makeText(this, "Navigate back button clicked.", Toast.LENGTH_SHORT).show();
-        return true;
+    public boolean onSupportNavigateUp(){
+        if(getActivityId() != R.layout.activity_home) {
+            finish();
+            return true;
+        }
+        return false;
+    }
+
+    protected void addNewDevice() {
+        if(getActivityId() != R.layout.activity_add_new_device) {
+            Intent intent = new Intent(this, AddNewDeviceActivity.class);
+            intent.putExtra("activity", this.getClass().getCanonicalName());
+            startActivityForResult(intent, ADD_DEVICE_ACTIVITY_RETURN_CODE);
+        }
+    }
+
+    protected void share() {
+        if(getActivityId() == R.layout.activity_home) { } else{}
     }
 
     protected void logout() {

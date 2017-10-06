@@ -30,4 +30,5 @@ public class HomeActivity extends WebViewBasedActivity {
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.loadUrl(uiService.getMainPage());
     }
+
 }

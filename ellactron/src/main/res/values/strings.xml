@@ -27,7 +27,7 @@
     <string name="password_requirement">
         Password must be at least 8 characters including at least one uppercase letter or one number
     </string>
-    <string name="copyright">NewBeem Cop. 2017</string>
+    <string name="copyright">Ellactron Corp. 2017</string>
 
     <!-- Menu item string -->
     <string name="main_menu_item_about">About</string>

@@ -90,6 +90,14 @@ public class SignUpActivity extends AppCompatActivity implements LoaderCallbacks
             }
         });
 
+        TextView txtSignIn = (TextView)findViewById(R.id.text_sign_in);
+        txtSignIn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
+
         mSignUpFormView = findViewById(R.id.signUp_form);
         mProgressView = findViewById(R.id.signUp_progress);
     }
